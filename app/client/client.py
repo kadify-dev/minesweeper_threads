@@ -29,6 +29,9 @@ class Client:
         logger.info("Клиент остановлен")
 
     def handle_server_message(self, data: dict[str, Any]) -> dict[str, Any]:
+
+        self.clear_input_buffer()
+
         if "grid" in data:
             self.grid = data["grid"]
 
@@ -53,6 +56,9 @@ class Client:
                 "stage": data["stage"],
             }
 
+        self.clear_console()
+        self.draw_field()
+
         return {"message": "OK"}
 
     def draw_field(self):
@@ -72,13 +78,11 @@ class Client:
             print()
             print("+----" * len(row) + "+")
 
-        print(self.message, end="")
+        print(self.message)
 
     def clear_console(self):
         if os.name == "nt":
             os.system("cls")
-        else:
-            os.system("clear")
 
     def clear_input_buffer(self):
         if os.name == "nt":
@@ -87,13 +91,9 @@ class Client:
 
     def run(self):
         while True:
-            data = receive(self.client_socket)
 
-            self.clear_input_buffer()
+            data = receive(self.client_socket)
 
             message = self.handle_server_message(data)
 
             send(self.client_socket, message)
-
-            self.clear_console()
-            self.draw_field()
